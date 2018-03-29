@@ -1,57 +1,75 @@
-# What is Certbot 
+# What is Certbot
 
 > [Certbot](https://certbot.eff.org) is an easy-to-use automatic client that fetches and deploys SSL/TLS certificates for your webserver. Certbot was developed by EFF and others as a client for [Let's Encrypt](https://letsencrypt.org) and was previously known as "the official Let’s Encrypt client" or "the Let’s Encrypt Python client." Certbot will also work with any other CAs that support the ACME protocol.
 
+## Credits
+
+This certbot docker image is inspired by [pslobo/dockerized-certbot](https://github.com/pslobo/dockerized-certbot) and [pierreprinetti/certbot](https://github.com/pierreprinetti/certbot).
+
+The installation of certbot and the route53 plugin is from pslobo and the script to create the certificates from pierreprinetti.
 
 ## How to use this image
 
-### Start a Certbot instance with the Apache plugin
-In it's simplest form, starting an instance is as easy as:
+### replace user with your github user
 
-    docker container run -it \
-           --rm \
-           --net host \
-           -v /etc/letsencrypt:/etc/letsencrypt \
-           -v /var/lib/letsencrypt:/var/lib/letsencrypt \
-           -v /var/www:/var/www \
-           palobo/certbot -t install --apache -d DOMAIN
+do this in this files:
 
-- `DOMAIN` is the domain name to apply. For multiple domains use multiple -d flags.
+* Dockerfile
+* docker-build.sh
+* star.mfg.otaya.letsencrypt.update.sh
 
+### build the image
 
-### Start a Certbot instance with the Webroot plugin
+    ./docker-build.sh
 
-```shell
-docker container run -it \
-       --rm \
-       -v /etc/letsencrypt:/etc/letsencrypt \
-       -v /var/www:/var/www \
-       palobo/certbot -t certonly --webroot -w WEBROOT_PATH -d DOMAIN
-```
+### Create a docker volume to store the certificates
 
-- `WEBROOT_PATH` is a public_html / webroot path. This can be specified multiple times to handle different domains; each domain will have the webroot path that preceded it and
-- `DOMAIN` is the domain name to apply. For multiple domains use multiple -d flags
+    docker volume create --name nginx-certs
+    
+### Set up an IAM user for editing your Rout53 Hosted zones
 
-### Start a Certbot instance with the Standalone plugin
+Create a IAM user to set up the DNS challenge.
+This policy seems to do the job:
 
-```shell
-docker container run -it \
-       --rm \
-       -p 443:443 \
-       -v /etc/letsencrypt:/etc/letsencrypt \
-       -v $(pwd)/log:/var/log/letsencrypt \
-       palobo/certbot certonly --standalone \
-       -t -m me@myemail.com -d my.domain.com
-```
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "route53:ListHostedZones",
+                  "route53:GetChange"
+              ],
+              "Resource": [
+                  "*"
+              ]
+          },
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "route53:ChangeResourceRecordSets"
+              ],
+              "Resource": [
+                  "arn:aws:route53:::hostedzone/YOUR-HOSTED-ZONE-ID"
+              ]
+          }
+      ]
+    }
 
-### Access the Container
-If for some reason you need to access the container to perform some troubleshooting or any other reason, you can do so by bypassing the entrypoint with:
+### Set up a env file with the keys
 
-```shell
-docker container run -it \
-                 --entrypoint /bin/sh
-                 palobo/certbot
-```
+Create the file aws_env with your IAMs user id and secret and other settings:
+
+    AWS_ACCESS_KEY_ID="....."
+    AWS_SECRET_ACCESS_KEY="......"
+    DOMAINS="...."
+    EMAIL="..."
+
+### Start a Certbot instance with the script
+
+    star.mfg.otaya.letsencrypt.update.sh
+
+Now watch the bot to do the work :)
 
 ## Exposed Ports
 

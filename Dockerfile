@@ -1,4 +1,4 @@
-FROM alpine:3.6
+FROM alpine:3.7
 LABEL maintainer="Pedro Lobo <https://github.com/pslobo>"
 LABEL Name="Dockerized Certbot"
 LABEL Version="1.2"
@@ -24,12 +24,16 @@ RUN export BUILD_DEPS="git \
     && /opt/certbot/venv/bin/pip install \
         -e /opt/certbot/src/acme \
         -e /opt/certbot/src \
-        -e /opt/certbot/src/certbot-apache \
-        -e /opt/certbot/src/certbot-nginx \ 
+        -e /opt/certbot/src/certbot-dns-route53 \
+#        -e /opt/certbot/src/certbot-apache \
+#        -e /opt/certbot/src/certbot-nginx \ 
     && apk del ${BUILD_DEPS} \
     && rm -rf /var/cache/apk/*
 
 EXPOSE 80 443
 VOLUME /etc/letsencrypt 
 
-ENTRYPOINT ["certbot"]
+COPY ./run.sh /run.sh
+RUN chmod +x /run.sh
+
+ENTRYPOINT ["/run.sh"]

@@ -35,5 +35,7 @@ VOLUME /etc/letsencrypt
 
 COPY ./run.sh /run.sh
 RUN chmod +x /run.sh
+COPY ./certbotloop.py /certbotloop.py
+RUN chmod +x /certbotloop.py
 
 ENTRYPOINT ["/run.sh"]

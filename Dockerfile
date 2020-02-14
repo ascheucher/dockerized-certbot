@@ -10,32 +10,38 @@ RUN export BUILD_DEPS="git \
                 build-base \
                 libffi-dev \
                 linux-headers \
-                py-pip \
                 python-dev" \
     && apk -U upgrade \
     && apk add dialog \
-                python \
+                python3 \
                 openssl-dev \
 		augeas-libs \
                 ${BUILD_DEPS} \
-    && pip --no-cache-dir install virtualenv \
-    && git clone https://github.com/letsencrypt/letsencrypt /opt/certbot/src \
-    && virtualenv --no-site-packages -p python2 /opt/certbot/venv \
-    && /opt/certbot/venv/bin/pip install \
+    &&  echo "**** install pip ****" \
+    && ls -l /usr/lib/python*/ensurepip \
+    && python3 -m ensurepip \
+    && pip3 --version \
+    && python3 -m pip install -U pip \
+    && pip3 --no-cache-dir install virtualenv \
+    &&git clone https://github.com/letsencrypt/letsencrypt /opt/certbot/src \
+    && virtualenv -p python3 /opt/certbot/venv 
+RUN ls -l \
+    && ls -l src \
+    && /opt/certbot/venv/bin/pip3 install \
         -e /opt/certbot/src/acme \
         -e /opt/certbot/src \
         -e /opt/certbot/src/certbot-dns-route53 \
 #        -e /opt/certbot/src/certbot-apache \
 #        -e /opt/certbot/src/certbot-nginx \ 
-    && apk del ${BUILD_DEPS} \
-    && rm -rf /var/cache/apk/*
+RUN export BUILD_DEPS="git build-base libffi-dev linux-headers python-dev" apk del ${BUILD_DEPS} \
+RUN rm -rf /var/cache/apk/*
 
 EXPOSE 80 443
 VOLUME /etc/letsencrypt 
 
-COPY ./run.sh /run.sh
-RUN chmod +x /run.sh
-COPY ./certbotloop.py /certbotloop.py
-RUN chmod +x /certbotloop.py
+COPY ./run.sh /opt/certbot/run.sh
+RUN chmod +x /opt/certbot/run.sh
+COPY ./certbotloop.py /opt/certbot/certbotloop.py
+RUN chmod +x /opt/certbot/certbotloop.py
 
 ENTRYPOINT ["/run.sh"]

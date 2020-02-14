@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 def call_certbot(email, domains):
   from subprocess import call

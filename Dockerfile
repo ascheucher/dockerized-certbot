@@ -24,20 +24,13 @@ RUN export BUILD_DEPS="git \
     && python3 -m pip install -U pip \
     && pip3 --no-cache-dir install virtualenv \
     && git clone https://github.com/letsencrypt/letsencrypt /opt/certbot/src \
-    && virtualenv -p python3 /opt/certbot/venv 
-RUN echo ls -l /opt/certbot && ls -l \
-    && echo which python3 && which python3 \
-    && echo ls -l src && ls -l src \
-    && echo ls -l /opt/certbot/src/acme && ls -l /opt/certbot/src/acme \
-    && echo ls -l /opt/certbot/src/certbot && ls -l /opt/certbot/src/certbot \
-    && echo ls -l /opt/certbot/src/certbot-dns-route53 && ls -l /opt/certbot/src/certbot-dns-route53 \
+    && virtualenv -p python3 /opt/certbot/venv \
     && /opt/certbot/venv/bin/pip3 install \
         -e /opt/certbot/src/acme \
         -e /opt/certbot/src/certbot \
-        -e /opt/certbot/src/certbot-dns-route53
-RUN echo find / -name certbot && find / -name certbot
-RUN export BUILD_DEPS="git build-base libffi-dev linux-headers python-dev" apk del ${BUILD_DEPS}
-RUN rm -rf /var/cache/apk/*
+        -e /opt/certbot/src/certbot-dns-route53 \
+    && apk del ${BUILD_DEPS} \
+    && rm -rf /var/cache/apk/*
 
 EXPOSE 80 443
 VOLUME /etc/letsencrypt 

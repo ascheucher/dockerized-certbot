@@ -15,7 +15,9 @@ then
   #if [ -z ${agree_tos+x} ]; then echo "Fatal: agree to the TOS setting the environment variable named 'agree_tos'"; exit 1; fi
   #if [ -z ${distinct+x} ]; then
 
-  certbotloop.py
+  d=$(pwd)
+  echo "python3 ${d}/certbotloop.py"
+  python3 ${d}/certbotloop.py
 
   #else
     #IFS=',' read -ra ADDR <<< "$domains"

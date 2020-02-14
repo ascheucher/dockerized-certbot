@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "This is a certbot development dummy. It only prints the given command line args:"
+echo $@

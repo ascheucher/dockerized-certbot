@@ -18,7 +18,7 @@ do this in this files:
 * docker-build.sh
 * star.mfg.otaya.letsencrypt.update.sh
 
-### build the image
+### build and tag the image
 
     ./docker-build.sh
 
@@ -58,10 +58,13 @@ This policy seems to do the job:
 
 ### Set up a env file with the keys
 
-Create the file aws_env with your IAMs user id and secret and other settings:
+Create the file aws-env with your IAMs user id and secret and other settings:
 
     AWS_ACCESS_KEY_ID="....."
     AWS_SECRET_ACCESS_KEY="......"
+
+And a env file with the email and the domains to create certs for:
+
     DOMAINS="...."
     EMAIL="..."
 

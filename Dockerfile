@@ -14,6 +14,7 @@ RUN export BUILD_DEPS="git \
     && apk -U upgrade \
     && apk add dialog \
                python3 \
+               rust \
                openssl-dev \
 		       augeas-libs \
                ${BUILD_DEPS} \

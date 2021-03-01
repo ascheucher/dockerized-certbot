@@ -1,12 +1,13 @@
-FROM alpine:3.7
+FROM alpine:3.9
 LABEL maintainer="Pedro Lobo <https://github.com/pslobo>"
 LABEL Name="Dockerized Certbot"
 LABEL Version="1.2"
 
 WORKDIR /opt/certbot
-ENV PATH /opt/certbot/venv/bin:$PATH
+ENV PATH "/root/.cargo/bin:/opt/certbot/venv/bin:$PATH"
 
 RUN export BUILD_DEPS="git \
+                curl \
                 build-base \
                 libffi-dev \
                 linux-headers \
@@ -16,8 +17,11 @@ RUN export BUILD_DEPS="git \
                python3 \
                rust \
                openssl-dev \
-		       augeas-libs \
+	       augeas-libs \
                ${BUILD_DEPS} \
+    && curl https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-musl/rustup-init --output /tmp/rustup-init \
+    && chmod +x /tmp/rustup-init \
+    && /tmp/rustup-init -y \
     &&  echo "**** install pip ****" \
     # && ls -l /usr/lib/python*/ensurepip \
     && python3 -m ensurepip \
@@ -31,7 +35,8 @@ RUN export BUILD_DEPS="git \
         -e /opt/certbot/src/certbot \
         -e /opt/certbot/src/certbot-dns-route53 \
     && apk del ${BUILD_DEPS} \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* \
+    && rustup self uninstall -y
 
 EXPOSE 80 443
 VOLUME /etc/letsencrypt 
